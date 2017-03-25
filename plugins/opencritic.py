@@ -6,6 +6,7 @@ from cloudbot import hook
 @hook.command('oc')
 def oc(text):
     url = 'http://api.opencritic.com/api/'
+    gameURL = url + 'game'
     searchURL = url + 'game/search'
     scoreURL = url +  'game/score'
 
@@ -28,11 +29,13 @@ def oc(text):
     'id': gameID
     }
 
-    response = requests.request("GET", scoreURL, headers = headers, params = scoreQuery)
+    response = requests.request("GET", gameURL, headers = headers, params = scoreQuery)
 
-    try:
+    if response.json()['ready'] == True:
+        response = requests.request("GET", scoreURL, headers = headers, params = scoreQuery)
+
         gameScore = math.ceil(float(response.json()['score']))
-    except:
-        return '\x02{}\x02 does not have an average score yet.'.format(gameTitle)
-    else:
+
         return '\x02{}\x02 - \x02Score:\x02 {} - {}'.format(gameTitle, gameScore, gameLink)
+    else:
+        return '\x02{}\x02 has not yet been released.'.format(gameTitle)
